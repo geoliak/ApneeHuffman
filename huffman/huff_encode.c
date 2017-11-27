@@ -79,22 +79,34 @@ Arbre ConstruireArbre() {
     return tempNode;
 }
 
-
-void Parcours(Arbre huff, code_char code_temp){
-	if(EstVide(FilsGauche(huff)) && EstVide(FilsDroit(huff))){
-		code_char a = 
-		HuffmanCode[(int)Etiq(huff)] = code_temp;
-	}
-
+void saveHuffmanCode(struct code_char source, struct code_char dest, int length) {
+  int i=0;
+  dest.lg = source.lg;
+  for (; i < length; i++) 
+    dest.code[i] = source.code[i];
+  return;
 }
 
-
+void Parcours(Arbre huff, struct code_char *HuffCode, struct code_char codeArray, int index){
+	if(EstVide(FilsGauche(huff)) && EstVide(FilsDroit(huff))){
+    saveHuffmanCode(codeArray, HuffCode[(int)Etiq(huff)], codeArray.lg);
+    return;
+	}
+  else {
+    codeArray.lg++;
+    codeArray.code[index] = 0;
+    int indexCopy = index;
+    Parcours(FilsGauche(huff), HuffCode, codeArray, indexCopy++);
+    codeArray.code[index] = 1;
+    Parcours(FilsGauche(huff), HuffCode, codeArray, index++);    
+  }
+}
 
 void ConstruireCode(Arbre huff) {
-	code_char code_temp;
-	Parcours(huff, code_temp);
+	struct code_char code_temp;
+	Parcours(huff, HuffmanCode, code_temp, 0);
 
-  printf("Programme non realise (ConstruireCode)\n");
+  //printf("Programme non realise (ConstruireCode)\n");
 }
 
 void Encoder() {
