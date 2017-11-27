@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "fap.h"
 #include "arbrebin.h"
@@ -6,6 +5,7 @@
 #include "bonus.h"
 #include "huffman_code.h"
 #include <assert.h>
+#include <string.h>
 
 FILE * fichier ;
 FILE * fichier_encode;
@@ -20,6 +20,8 @@ Arbre ArbreHuffman;
 
 struct code_char HuffmanCode[256];
 
+void Parcours(Arbre huff, struct code_char code_temp);
+
 void  ConstruireTableOcc () {
 
 #ifdef BONUS_1
@@ -31,6 +33,7 @@ void  ConstruireTableOcc () {
 
   c = fgetc(fichier);
   while (c != EOF) {
+
     /* A COMPLETER ... */
     c = fgetc(fichier);
   } ;
@@ -49,7 +52,7 @@ void  ConstruireTableOcc () {
 
 
 void InitHuffman() {
-  /* A COMPLETER */
+
 	Arbre node = ArbreVide();
 	int i=0;
 
@@ -58,14 +61,10 @@ void InitHuffman() {
 			node = NouveauNoeud(NULL, (char) i, NULL);
 			file = inserer(file, node, TableOcc[i]);
 		}
-		
-	} 
-
-  //printf("Programme non realise (InitHuffman)\n");
+		} 
 }
 
 Arbre ConstruireArbre() {
-  /* A COMPLETER */
 	Arbre tempNode, node1, node2;
 	int pr1, pr2;
 	while (!(est_fap_vide(file))) {
@@ -79,46 +78,74 @@ Arbre ConstruireArbre() {
     return tempNode;
 }
 
-void saveHuffmanCode(struct code_char source, struct code_char dest, int length) {
-  int i=0;
-  dest.lg = source.lg;
-  for (; i < length; i++) 
-    dest.code[i] = source.code[i];
-  return;
-}
-
-void Parcours(Arbre huff, struct code_char *HuffCode, struct code_char codeArray, int index){
-	if(EstVide(FilsGauche(huff)) && EstVide(FilsDroit(huff))){
-    saveHuffmanCode(codeArray, HuffCode[(int)Etiq(huff)], codeArray.lg);
-    return;
-	}
-  else {
-    codeArray.lg++;
-    codeArray.code[index] = 0;
-    int indexCopy = index;
-    Parcours(FilsGauche(huff), HuffCode, codeArray, indexCopy++);
-    codeArray.code[index] = 1;
-    Parcours(FilsGauche(huff), HuffCode, codeArray, index++);    
-  }
-}
 
 void ConstruireCode(Arbre huff) {
-	struct code_char code_temp;
-	Parcours(huff, HuffmanCode, code_temp, 0);
 
-  //printf("Programme non realise (ConstruireCode)\n");
+	struct code_char code_temp;
+	code_temp.lg = 0;
+	Parcours(huff, code_temp);
+	
+	for(int i = 0; i<256; i++){
+		if(HuffmanCode[i].lg!=0){
+			printf("\nlg=%d %c code=",HuffmanCode[i].lg,(char)i);
+			for(int g=0;g<HuffmanCode[i].lg;g++){
+				printf("%d",HuffmanCode[i].code[g]);
+			}
+			printf("\n");
+		}
+	}
+	
+}
+
+void Parcours(Arbre huff, struct code_char code_temp){
+	struct code_char a;
+	
+	if(EstVide(FilsGauche(huff)) && EstVide(FilsDroit(huff))){
+
+		memcpy(a.code,code_temp.code,sizeof(int)*code_temp.lg);
+		a.lg = code_temp.lg;
+		HuffmanCode[(int)Etiq(huff)] = code_temp;
+	}
+	else{
+		
+		if(code_temp.lg!=0)
+		memcpy(a.code,code_temp.code,sizeof(int)*(code_temp.lg));
+		a.code[code_temp.lg] = 0;
+		a.lg = code_temp.lg + 1;
+		Parcours(FilsGauche(huff),a);
+		
+		if(code_temp.lg!=0)
+		memcpy(a.code,code_temp.code,sizeof(int)*(code_temp.lg));
+		a.code[code_temp.lg] = 1;
+		a.lg = code_temp.lg + 1;
+		Parcours(FilsDroit(huff),a);		
+		
+	}
+
 }
 
 void Encoder() {
-  /* A COMPLETER */
-  printf("Programme non realise (Encoder)\n");
+	struct code_char char_encode;
+	BFILE *ecr_bab = bstart(fichier_encode,"w");
+	
+	EcrireArbre(fichier_encode,ArbreHuffman);
+
+	while(!feof(fichier)){
+		int i=0;
+		char_encode = HuffmanCode[fgetc(fichier)];
+		while(i < char_encode.lg){
+			bitwrite(ecr_bab,char_encode.code[i]);
+			i++;
+		}
+	}
+	bstop(ecr_bab);
 }
-  
+
+
 int main (int argc, char *argv[]) {
 
   fichier = fopen (argv[1], "r") ;
   /* Construire la table d'occurences */
-
   ConstruireTableOcc () ;
   fclose(fichier);
 
@@ -127,7 +154,7 @@ int main (int argc, char *argv[]) {
 
   /* Construire l'arbre d'Huffman */
   ArbreHuffman = ConstruireArbre();
-  
+
   AfficherArbre(ArbreHuffman);
 
   /* Construire la table de codage */
