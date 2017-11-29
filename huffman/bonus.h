@@ -1,6 +1,8 @@
 #ifndef __BONUS__
 #define __BONUS__
 
+#define BONUS_1
+
 #include <stdio.h>
 #include "huffman_code.h"
 #include "arbrebin.h"

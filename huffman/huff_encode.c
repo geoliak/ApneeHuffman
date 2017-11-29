@@ -25,28 +25,30 @@ void Parcours(Arbre huff, struct code_char code_temp);
 void  ConstruireTableOcc () {
 
 #ifdef BONUS_1
-  int c;
+	int c;
 
-  /* A COMPLETER ... */
-  printf("Programme non realise (ConstruireTableOcc)\n");
+	for(int i = 0; i < 256; i++){
+		TableOcc[i] = 0;
+	}
+
+	c = fgetc(fichier);
+	while (c != EOF) {
+		TableOcc[c] = TableOcc[c] + 1;
+		c = fgetc(fichier);
+	};
 
 
-  c = fgetc(fichier);
-  while (c != EOF) {
-
-    /* A COMPLETER ... */
-    c = fgetc(fichier);
-  } ;
 #else
-  bonus2_ConstruireTableOcc(TableOcc, fichier);
+
+	bonus2_ConstruireTableOcc(TableOcc, fichier);
 #endif
-  
-  int i;
-  for (i=0 ; i<256 ; i++) {
-    if (TableOcc[i] != 0)  
-      printf ("Occurences du caractere %c (code %d) : %d\n",
-              i, i, TableOcc[i]) ;
-  } ;
+
+	int i;
+	for (i=0 ; i<256 ; i++) {
+		if (TableOcc[i] != 0)  
+			printf ("Occurences du caractere %c (code %d) : %d\n",
+				i, i, TableOcc[i]) ;
+	} ;
 
 }
 
@@ -61,7 +63,7 @@ void InitHuffman() {
 			node = NouveauNoeud(NULL, (char) i, NULL);
 			file = inserer(file, node, TableOcc[i]);
 		}
-		} 
+	} 
 }
 
 Arbre ConstruireArbre() {
@@ -75,7 +77,7 @@ Arbre ConstruireArbre() {
 			file = inserer(file, tempNode, pr1+pr2);
 	}
 
-    return tempNode;
+	return tempNode;
 }
 
 
@@ -109,13 +111,13 @@ void Parcours(Arbre huff, struct code_char code_temp){
 	else{
 		
 		if(code_temp.lg!=0)
-		memcpy(a.code,code_temp.code,sizeof(int)*(code_temp.lg));
+			memcpy(a.code,code_temp.code,sizeof(int)*(code_temp.lg));
 		a.code[code_temp.lg] = 0;
 		a.lg = code_temp.lg + 1;
 		Parcours(FilsGauche(huff),a);
 		
 		if(code_temp.lg!=0)
-		memcpy(a.code,code_temp.code,sizeof(int)*(code_temp.lg));
+			memcpy(a.code,code_temp.code,sizeof(int)*(code_temp.lg));
 		a.code[code_temp.lg] = 1;
 		a.lg = code_temp.lg + 1;
 		Parcours(FilsDroit(huff),a);		
@@ -144,30 +146,30 @@ void Encoder() {
 
 int main (int argc, char *argv[]) {
 
-  fichier = fopen (argv[1], "r") ;
+	fichier = fopen (argv[1], "r") ;
   /* Construire la table d'occurences */
-  ConstruireTableOcc () ;
-  fclose(fichier);
+	ConstruireTableOcc () ;
+	fclose(fichier);
 
   /* Initialiser la FAP */
-  InitHuffman();
+	InitHuffman();
 
   /* Construire l'arbre d'Huffman */
-  ArbreHuffman = ConstruireArbre();
+	ArbreHuffman = ConstruireArbre();
 
-  AfficherArbre(ArbreHuffman);
+	AfficherArbre(ArbreHuffman);
 
   /* Construire la table de codage */
-  ConstruireCode(ArbreHuffman);
-  
-  /* Encodage */
-  fichier = fopen (argv[1], "r");
-  fichier_encode = fopen(argv[2], "w");
+	ConstruireCode(ArbreHuffman);
 
-  Encoder();
-  
-  fclose(fichier_encode);
-  fclose(fichier);
-  
-  return 0 ;
+  /* Encodage */
+	fichier = fopen (argv[1], "r");
+	fichier_encode = fopen(argv[2], "w");
+
+	Encoder();
+
+	fclose(fichier_encode);
+	fclose(fichier);
+
+	return 0 ;
 }
